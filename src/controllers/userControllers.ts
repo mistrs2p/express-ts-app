@@ -6,6 +6,7 @@ import {
   generateToken,
 } from "../services/userServices";
 import bcrypt from "bcryptjs";
+import { successResponse, errorResponse } from "../utils/responseFormatter";
 
 export const registerUser = async (
   req: Request,
@@ -17,15 +18,14 @@ export const registerUser = async (
 
     const existingUser = await findUserByEmail(email);
     if (existingUser) {
-      res.status(400).json({ message: "User already exists" });
-      return;
+      return errorResponse(res, "User already exists");
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = await createUser({ name, email, password: hashedPassword });
 
     const token = generateToken(newUser);
-    res.status(201).json({ token });
+    return successResponse(res, { token }, 201);
   } catch (error) {
     next(error);
   }
@@ -40,12 +40,11 @@ export const loginUser = async (
 
   const user = await findUserByEmail(email);
   if (!user || !(await user.comparePassword(password))) {
-    res.status(400).json({ message: "Invalid email or password" });
-    return;
+    return errorResponse(res, "Invalid email or password", 400);
   }
 
   const token = generateToken(user);
-  res.status(200).json({ token });
+  return successResponse(res, { token });
 };
 
 export const allUsers = async (
@@ -53,8 +52,15 @@ export const allUsers = async (
   res: Response,
   next: NextFunction
 ): Promise<void> => {
-  const users = await getAllUsers();
-  res.status(200).json(users);
+  try {
+    const users = await getAllUsers();
+    // if ('user' in req) {
+    //   console.log(req.user)
+    // }
+    // console.log(req)
+    return successResponse(res, users);
+  } catch (error: Error | any) {
+    next(error);
+    // res.status(400).json({ message: "req.user not provided" });
+  }
 };
-
-

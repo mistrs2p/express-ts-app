@@ -73,7 +73,7 @@ router.post(
 
 router.get(
   '/getusers',
-  // authMiddleware,
+  authMiddleware,
   allUsers
 );
 
