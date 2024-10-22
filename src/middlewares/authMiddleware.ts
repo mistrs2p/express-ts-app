@@ -1,7 +1,9 @@
+/// <reference path="../types/express.d.ts" />
+
 import { Request, Response, NextFunction } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { errorResponse } from "../utils/responseFormatter";
-import logger from "../utils/logger";
+
 
 export const authMiddleware = (
   req: Request,
@@ -21,16 +23,8 @@ export const authMiddleware = (
     if (!decoded) {
       throw new Error("Invalid token");
     }
-    if ("user" in req) {
-      req.user = decoded;
-      logger.info(req.user);
-    }
-    // console.log(req.user);
+    req.user = decoded; // why I need this
     next();
-
-    // const decoded = jwt.verify(token, process.env.JWT_SECRET!) as string | JwtPayload;
-    // req.user = decoded;
-    // next();
   } catch (error) {
     return errorResponse(res, error as string, 401);
   }
