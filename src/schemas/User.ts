@@ -6,6 +6,7 @@ export interface IUser extends Document {
   email: string;
   password: string;
   comparePassword(enteredPassword: string): Promise<boolean>;
+  hashedPassword(): Promise<string>;
 }
 
 export interface CreateUserDTO {
@@ -24,6 +25,10 @@ UserSchema.methods.comparePassword = async function (
   enteredPassword: string
 ): Promise<boolean> {
   return await bcrypt.compare(enteredPassword, this.password);
+};
+
+UserSchema.methods.hashedPassword = async function (): Promise<string> {
+  return await bcrypt.hash(this.password, 10);
 };
 
 const User = mongoose.model<IUser>("User", UserSchema);

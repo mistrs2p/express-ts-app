@@ -4,9 +4,9 @@ import {
   findUserByEmail,
   getAllUsers,
   generateToken,
-} from "../services/userServices";
-import bcrypt from "bcryptjs";
+} from "../models/user.model";
 import { successResponse, errorResponse } from "../utils/responseFormatter";
+import User from "../schemas/User";
 
 export const registerUser = async (
   req: Request,
@@ -21,9 +21,10 @@ export const registerUser = async (
       return errorResponse(res, "User already exists");
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = await createUser({ name, email, password: hashedPassword });
-
+    // const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = new User({ name, email, password });
+    newUser.password = await newUser.hashedPassword()
+    await createUser(newUser)
     const token = generateToken(newUser);
     return successResponse(res, { token }, 201);
   } catch (error) {
@@ -40,6 +41,7 @@ export const loginUser = async (
 
   const user = await findUserByEmail(email);
   if (!user || !(await user.comparePassword(password))) {
+    console.log(user)
     return errorResponse(res, "Invalid email or password", 400);
   }
 
@@ -54,13 +56,9 @@ export const allUsers = async (
 ): Promise<void> => {
   try {
     const users = await getAllUsers();
-    // if ('user' in req) {
-    //   console.log(req.user)
-    // }
-    // console.log(req)
+    
     return successResponse(res, users);
   } catch (error: Error | any) {
     next(error);
-    // res.status(400).json({ message: "req.user not provided" });
   }
 };
