@@ -1,7 +1,11 @@
 import express from 'express';
 import { registerUser, loginUser, allUsers } from '../controllers/userControllers';
-import { check } from 'express-validator';
+// import { check } from 'express-validator';
 import { authMiddleware } from '../middlewares/authMiddleware';
+import { userRegisterSchema, userLoginSchema } from "../schemas/User";
+import { validateSchema } from '../middlewares/validateSchema';
+
+
 const router = express.Router();
 
 /**
@@ -24,13 +28,19 @@ const router = express.Router();
  */
 router.post(
   '/register',
-  [
-    check('name', 'Name is required').notEmpty().isLength({ min: 4 }).withMessage('Name must be at least 4 characters long'),
-    check('email', 'Valid email is required').isEmail(),
-    check('password', 'Password must be at least 6 characters').isLength({ min: 6 }),
-  ],
+  validateSchema(userRegisterSchema),
   registerUser
 );
+
+// router.post(
+//   '/register',
+//   [
+//     check('name', 'Name is required').notEmpty().isLength({ min: 4 }).withMessage('Name must be at least 4 characters long'),
+//     check('email', 'Valid email is required').isEmail(),
+//     check('password', 'Password must be at least 6 characters').isLength({ min: 6 }),
+//   ],
+//   registerUser
+// );
 
 /**
  * @swagger
@@ -64,12 +74,17 @@ router.post(
  */
 router.post(
   '/login',
-  [
-    check('email', 'Valid email is required').isEmail(),
-    check('password', 'Password is required').exists(),
-  ],
+  validateSchema(userLoginSchema),
   loginUser
 );
+// router.post(
+//   '/login',
+//   [
+//     check('email', 'Valid email is required').isEmail(),
+//     check('password', 'Password is required').exists(),
+//   ],
+//   loginUser
+// );
 
 router.get(
   '/getusers',

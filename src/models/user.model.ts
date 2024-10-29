@@ -1,4 +1,4 @@
-import User, { IUser, CreateUserDTO } from "../schemas/User";
+import { User, IUser } from "../schemas/User";
 import jwt from "jsonwebtoken";
 
 export const createUser = async (user: IUser) => {
